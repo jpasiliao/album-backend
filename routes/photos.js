@@ -61,24 +61,8 @@ router.delete('/', (req, res, next) => {
     const data = req.body;
 
     if (data.length > 0) {
-        data.map(d => {
-            let file = d.documents.split(',');
-            let path = d.album.toLowerCase();
-            file.map(f => {
-                try {
-                    fs.unlinkSync('./photos/' + path + '/' + f);
-                    res.status(200).json({ message: "OK" }).send();
-                } catch (err) {
-                    console.error(err);
-                    if (err.code == "ENOENT") {
-                        res.status(400).json({ message: "File Not found" }).end();
-                    } else {
-                        res.status(400).end(err);
-                    }
-
-                }
-            });
-        });
+        deleteImages(data, res);
+        res.status(200).json({ message: "OK" }).send();
     } else {
         console.error(err);
         res.status(400).json({ message: "No file to be deleted" }).end();
@@ -126,6 +110,25 @@ function consolidateImg() {
 
     return images;
 
+};
+
+function deleteImages(data, res){
+    data.map(d => {
+        let file = d.documents.split(',');
+        let path = d.album.toLowerCase();
+        file.map(f => {
+            try {
+                fs.unlinkSync('./photos/' + path + '/' + f);
+            } catch (err) {
+                console.error(err);
+                if (err.code == "ENOENT") {
+                    res.status(400).json({ message: "File Not found" }).send();
+                } else {
+                    res.status(400).send(err);
+                }
+            }
+        });
+    });
 };
 
 function generateId() {
